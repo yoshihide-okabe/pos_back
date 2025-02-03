@@ -3,13 +3,18 @@ from pydantic import BaseModel
 import mysql.connector
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+import os #追加環境変数を取得するためのモジュール
+import uvicorn
 
 app = FastAPI()
 
 # 🚀 CORS設定を追加
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # すべてのオリジン（フロントエンド）を許可
+    allow_origins=[
+        "https://tech0-gen8-step4-pos-app-115.azurewebsites.net",  # 本番用
+        "http://localhost:3000"  # ローカル開発用
+    ],
     allow_credentials=True,
     allow_methods=["*"],  # すべてのHTTPメソッド（GET, POSTなど）を許可
     allow_headers=["*"],  # すべてのHTTPヘッダーを許可
@@ -99,8 +104,11 @@ def purchase_items(request: PurchaseRequest):
 
             if not product:
                 raise HTTPException(status_code=404, detail=f"Product with code {item.code} not found")
-
-            prd_id, product_name, product_price = product
+                
+            # prd_id, product_name, product_price = product
+            prd_id = product["PRD_ID"]
+            product_name = product["NAME"]
+            product_price = product["PRICE"]
 
             # `DTL_ID` の最大値を取得し、+1 する
             cursor.execute("SELECT MAX(DTL_ID) FROM transaction_details_okabe")
@@ -132,11 +140,16 @@ def purchase_items(request: PurchaseRequest):
         conn.close()
 
         return {"success": True, "total_amount": total_amount}
-
+    
     except mysql.connector.Error as err:
         raise HTTPException(status_code=500, detail=f"MySQL Error: {err}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
+        
+#  **起動スクリプトを追加**
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # 環境変数 PORT を取得（デフォルト 8000）
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
