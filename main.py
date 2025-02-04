@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import mysql.connector
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
-import os #追加環境変数を取得するためのモジュール
+import os
 import uvicorn
 
 app = FastAPI() 
