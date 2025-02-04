@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os #追加環境変数を取得するためのモジュール
 import uvicorn
 
-app = FastAPI()
+app = FastAPI(root_path="/api") 
 
 # 🚀 CORS設定を追加
 app.add_middleware(
