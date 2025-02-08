@@ -148,8 +148,13 @@ def purchase_items(request: PurchaseRequest):
         raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
         
 #  **起動スクリプトを追加**
+#if __name__ == "__main__":
+#    port = int(os.environ.get("PORT", 8000))  # 環境変数 PORT を取得（デフォルト 8000）
+#    uvicorn.run(app, host="0.0.0.0", port=port)
+#
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  # 環境変数 PORT を取得（デフォルト 8000）
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), reload=True)
+
 
 
