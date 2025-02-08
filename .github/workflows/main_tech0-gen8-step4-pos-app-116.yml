@@ -31,11 +31,15 @@ jobs:
       
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
+
+      # 🆕 startup.sh を実行可能にする
+      - name: Make startup.sh executable
+        run: chmod +x startup.sh
+
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip release.zip ./* -r -x "venv/*" -x "__pycache__/*"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
@@ -43,7 +47,7 @@ jobs:
           name: python-app
           path: |
             release.zip
-            !venv/
+            startup.sh # 🆕 startup.sh をデプロイ対象に追加
 
   deploy:
     runs-on: ubuntu-latest
