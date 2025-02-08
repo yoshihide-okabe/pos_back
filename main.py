@@ -27,9 +27,10 @@ def read_root():
 # MySQL接続設定
 db_config = {
     "host": "tech0-gen-8-step4-db-5.mysql.database.azure.com",
-    "user": "Tech0Gen8TA5",
+    "user": "Tech0Gen8TA5@tech0-gen-8-step4-db-5",
     "password": "gen8-1-ta@5",  # AzuleDB（こうさん構築の）MySQLのパスワードに変更
-    "database": "class5_db"
+    "database": "class5_db",
+    "ssl_ca": "/etc/ssl/cert.pem", 
 }
 
 # 商品情報モデル
