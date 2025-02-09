@@ -79,13 +79,23 @@ def purchase_items(request: PurchaseRequest):
         emp_cd = request.emp_cd if request.emp_cd.strip() else '9999999999'
         
         # 取引の登録（取引一意キーは AUTO_INCREMENT の TRD_ID で管理）
-        cursor.execute(
-            """
-            INSERT INTO transactions_okabe (DATETIME, EMP_CD, STORE_CD, POS_NO, TOTAL_AMT) 
-            VALUES (NOW(), %s, %s, %s, %s)
-            """,
-            (emp_cd, '30', '90',  0)
-        )
+        #cursor.execute(
+        #    """
+        #    INSERT INTO transactions_okabe (DATETIME, EMP_CD, STORE_CD, POS_NO, TOTAL_AMT) 
+        #    VALUES (NOW(), %s, %s, %s, %s)
+        #    """,
+        #    (emp_cd, '30', '90',  0)
+        #)
+
+        try:
+            cursor.execute(
+                "INSERT INTO transactions_okabe (DATETIME, EMP_CD, STORE_CD, POS_NO, TOTAL_AMT) VALUES (NOW(), %s, %s, %s, %s)",
+                 (emp_cd, '30', '90', 0)
+            )
+            print("✅ 取引データのINSERT成功")
+        except mysql.connector.Error as err:
+            print(f"❌ MySQLエラー: {err}")
+            raise HTTPException(status_code=500, detail=f"MySQL Error: {err}")
 
         transaction_id = cursor.lastrowid   # 取引一意キーの取得
 
