@@ -61,10 +61,13 @@ def get_product(code: str):
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
     
-    print(f"🔍 受信した商品コード: {code}")  # 受信したコードを確認
+    print(f"🔍 受信した商品コード: {code}", file=sys.stdout)  # 受信したコードを確認
+    sys.stdout.flush()
+
     cursor.execute("SELECT * FROM m_product_okabe WHERE CODE = %s", (code,))
     product = cursor.fetchone()
-    print(f"🔍 検索結果: {product}")  # ここでデータが取得できているか確認
+    print(f"🔍 検索結果: {product}", file=sys.stdout)  # ここでデータが取得できているか確認
+    sys.stdout.flush()
     
     cursor.close()
     conn.close()
@@ -111,6 +114,7 @@ def purchase_items(request: PurchaseRequest):
             prd_id = product["PRD_ID"]
             product_name = product["NAME"]
             product_price = product["PRICE"]
+            
             print(f"✅ 商品情報取得: PRD_ID={prd_id}, NAME={product_name}, PRICE={product_price}", file=sys.stdout)
             sys.stdout.flush()
 
