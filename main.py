@@ -73,7 +73,7 @@ def get_product(code: str):
 def purchase_items(request: PurchaseRequest):
     try:
         conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
         # レジ担当者コードのデフォルト設定
         emp_cd = request.emp_cd if request.emp_cd.strip() else '9999999999'
