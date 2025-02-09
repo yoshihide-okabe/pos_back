@@ -1,3 +1,8 @@
+import sys  # 🔥 sys をインポートして標準出力を強制フラッシュ
+
+print("🚀 FastAPI アプリケーションが起動しました", file=sys.stdout)
+sys.stdout.flush()  # 🔥 これでログがすぐに表示される
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import mysql.connector
@@ -84,15 +89,18 @@ def purchase_items(request: PurchaseRequest):
         )
         conn.commit()  # ✅ ここでコミット
         transaction_id = cursor.lastrowid
-        print(f"✅ 取引データ挿入成功: TRD_ID = {transaction_id}")
 
+        print(f"✅ 取引データ挿入成功: TRD_ID = {transaction_id}", file=sys.stdout)
+        sys.stdout.flush()
+        
         if not transaction_id:
             raise HTTPException(status_code=500, detail="Failed to insert transaction record")
 
         total_amount = 0
 
         for item in request.items:
-            print(f"🔍 商品コード取得: {item.code}")
+            print(f"🔍 商品コード取得: {item.code}", file=sys.stdout)
+            sys.stdout.flush()
 
             cursor.execute("SELECT PRD_ID, NAME, PRICE FROM m_product_okabe WHERE CODE = %s", (item.code,))
             product = cursor.fetchone()
@@ -103,13 +111,15 @@ def purchase_items(request: PurchaseRequest):
             prd_id = product["PRD_ID"]
             product_name = product["NAME"]
             product_price = product["PRICE"]
-            print(f"✅ 商品情報取得: PRD_ID={prd_id}, NAME={product_name}, PRICE={product_price}")
+            print(f"✅ 商品情報取得: PRD_ID={prd_id}, NAME={product_name}, PRICE={product_price}", file=sys.stdout)
+            sys.stdout.flush()
 
             cursor.execute("SELECT MAX(DTL_ID) FROM transaction_details_okabe")
             max_dtl_id = cursor.fetchone()
             new_dtl_id = 1 if max_dtl_id is None or max_dtl_id[0] is None else max_dtl_id[0] + 1
-            print(f"✅ 新しい明細ID: {new_dtl_id}")
-
+            print(f"✅ 新しい明細ID: {new_dtl_id}", file=sys.stdout)
+            sys.stdout.flush()
+            
             cursor.execute(
                 """
                 INSERT INTO transaction_details_okabe
@@ -119,7 +129,8 @@ def purchase_items(request: PurchaseRequest):
                 (new_dtl_id, transaction_id, prd_id, item.code, product_name, int(product_price))
             )
             total_amount += int(product_price)
-            print(f"✅ 明細データ登録成功: DTL_ID={new_dtl_id}")
+            print(f"✅ 明細データ登録成功: DTL_ID={new_dtl_id}", file=sys.stdout)
+            sys.stdout.flush()
 
         # 合計金額を更新
         cursor.execute(
@@ -127,7 +138,8 @@ def purchase_items(request: PurchaseRequest):
             (total_amount, transaction_id)
         )
         conn.commit()
-        print(f"✅ 合計金額更新成功: TOTAL_AMT = {total_amount}")
+        rint(f"✅ 合計金額更新成功: TOTAL_AMT = {total_amount}", file=sys.stdout)
+        sys.stdout.flush()
 
         cursor.close()
         conn.close()
@@ -135,11 +147,13 @@ def purchase_items(request: PurchaseRequest):
         return {"success": True, "total_amount": total_amount}
     
     except mysql.connector.Error as err:
-        print(f"❌ MySQLエラー: {err}")
+        print(f"❌ MySQLエラー: {err}", file=sys.stdout)
+        sys.stdout.flush()
         raise HTTPException(status_code=500, detail=f"MySQL Error: {err}")
 
     except Exception as e:
-        print(f"❌ 予期しないエラー: {str(e)}")
+        print(f"❌ 予期しないエラー: {str(e)}", file=sys.stdout)
+        sys.stdout.flush()
         raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
         
 #  **起動スクリプトを追加**
