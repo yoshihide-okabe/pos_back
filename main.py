@@ -28,7 +28,7 @@ def read_root():
 db_config = {
     "host": "tech0-gen-8-step4-db-5.mysql.database.azure.com",
     "user": "Tech0Gen8TA5@tech0-gen-8-step4-db-5",
-    "password": "正しいパスワード",
+    "password": "gen8-1-ta@5",
     "database": "class5_db",
     "ssl_ca": "C:\\MySQL\\MySQL Server 8.4\\certs\\DigiCertGlobalRootCA.crt.pem"  # ✅ 余計なカンマを削除
 }
