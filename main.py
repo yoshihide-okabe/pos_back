@@ -116,6 +116,10 @@ def purchase_items(request: PurchaseRequest):
 
             cursor.execute("SELECT MAX(DTL_ID) FROM transaction_details_okabe")
             max_dtl_id = cursor.fetchone()
+
+            print(f"🔍 `MAX(DTL_ID)` の取得結果: {max_dtl_id}", file=sys.stdout)
+            sys.stdout.flush()
+
             new_dtl_id = 1 if max_dtl_id is None or max_dtl_id[0] is None else max_dtl_id[0] + 1
             print(f"✅ 新しい明細ID: {new_dtl_id}", file=sys.stdout)
             sys.stdout.flush()
