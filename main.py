@@ -123,6 +123,9 @@ def purchase_items(request: PurchaseRequest):
             new_dtl_id = 1 if max_dtl_id is None or max_dtl_id[0] is None else max_dtl_id[0] + 1
             print(f"✅ 新しい明細ID: {new_dtl_id}", file=sys.stdout)
             sys.stdout.flush()
+
+            print(f"🛠 INSERTデータ: DTL_ID={new_dtl_id}, TRD_ID={transaction_id}, PRD_ID={prd_id}, PRD_CODE={item.code}, PRD_NAME={product_name}, PRD_PRICE={product_price}", file=sys.stdout)
+            sys.stdout.flush()
             
             cursor.execute(
                 """
