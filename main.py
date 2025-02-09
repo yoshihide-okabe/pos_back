@@ -1,7 +1,7 @@
 import sys  # 🔥 sys をインポートして標準出力を強制フラッシュ
 
+sys.stdout.reconfigure(encoding='utf-8') # 🔥 これでログがすぐに表示される
 print("🚀 FastAPI アプリケーションが起動しました", file=sys.stdout)
-sys.stdout.flush()  # 🔥 これでログがすぐに表示される
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -138,7 +138,7 @@ def purchase_items(request: PurchaseRequest):
             (total_amount, transaction_id)
         )
         conn.commit()
-        rint(f"✅ 合計金額更新成功: TOTAL_AMT = {total_amount}", file=sys.stdout)
+        print(f"✅ 合計金額更新成功: TOTAL_AMT = {total_amount}", file=sys.stdout)
         sys.stdout.flush()
 
         cursor.close()
