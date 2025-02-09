@@ -75,29 +75,16 @@ def purchase_items(request: PurchaseRequest):
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
 
-        # レジ担当者コードのデフォルト設定
         emp_cd = request.emp_cd if request.emp_cd.strip() else '9999999999'
-        
-        # 取引の登録（取引一意キーは AUTO_INCREMENT の TRD_ID で管理）
-        #cursor.execute(
-        #    """
-        #    INSERT INTO transactions_okabe (DATETIME, EMP_CD, STORE_CD, POS_NO, TOTAL_AMT) 
-        #    VALUES (NOW(), %s, %s, %s, %s)
-        #    """,
-        #    (emp_cd, '30', '90',  0)
-        #)
 
-        try:
-            cursor.execute(
-                "INSERT INTO transactions_okabe (DATETIME, EMP_CD, STORE_CD, POS_NO, TOTAL_AMT) VALUES (NOW(), %s, %s, %s, %s)",
-                 (emp_cd, '30', '90', 0)
-            )
-            print("✅ 取引データのINSERT成功")
-        except mysql.connector.Error as err:
-            print(f"❌ MySQLエラー: {err}")
-            raise HTTPException(status_code=500, detail=f"MySQL Error: {err}")
-
-        transaction_id = cursor.lastrowid   # 取引一意キーの取得
+        # 取引データを挿入
+        cursor.execute(
+            "INSERT INTO transactions_okabe (DATETIME, EMP_CD, STORE_CD, POS_NO, TOTAL_AMT) VALUES (NOW(), %s, %s, %s, %s)",
+            (emp_cd, '30', '90', 0)
+        )
+        conn.commit()  # ✅ ここでコミット
+        transaction_id = cursor.lastrowid
+        print(f"✅ 取引データ挿入成功: TRD_ID = {transaction_id}")
 
         if not transaction_id:
             raise HTTPException(status_code=500, detail="Failed to insert transaction record")
@@ -105,30 +92,24 @@ def purchase_items(request: PurchaseRequest):
         total_amount = 0
 
         for item in request.items:
-            
-            if not item.code:
-                raise HTTPException(status_code=400, detail="Invalid item data: PRD_CODE is required")
+            print(f"🔍 商品コード取得: {item.code}")
 
-            # `m_product_okabe` から `PRD_ID`, `NAME`, `PRICE` を取得
             cursor.execute("SELECT PRD_ID, NAME, PRICE FROM m_product_okabe WHERE CODE = %s", (item.code,))
             product = cursor.fetchone()
 
             if not product:
                 raise HTTPException(status_code=404, detail=f"Product with code {item.code} not found")
-                
-            # prd_id, product_name, product_price = product
+
             prd_id = product["PRD_ID"]
             product_name = product["NAME"]
             product_price = product["PRICE"]
+            print(f"✅ 商品情報取得: PRD_ID={prd_id}, NAME={product_name}, PRICE={product_price}")
 
-            # `DTL_ID` の最大値を取得し、+1 する
             cursor.execute("SELECT MAX(DTL_ID) FROM transaction_details_okabe")
-            max_dtl_id = cursor.fetchone()[0]
-            
-            # `MAX(DTL_ID)` が `None` の場合、最初の値を `1` に設定
-            new_dtl_id = 1 if max_dtl_id is None else max_dtl_id + 1
-            
-            # 商品明細の登録
+            max_dtl_id = cursor.fetchone()
+            new_dtl_id = 1 if max_dtl_id is None or max_dtl_id[0] is None else max_dtl_id[0] + 1
+            print(f"✅ 新しい明細ID: {new_dtl_id}")
+
             cursor.execute(
                 """
                 INSERT INTO transaction_details_okabe
@@ -138,24 +119,27 @@ def purchase_items(request: PurchaseRequest):
                 (new_dtl_id, transaction_id, prd_id, item.code, product_name, int(product_price))
             )
             total_amount += int(product_price)
+            print(f"✅ 明細データ登録成功: DTL_ID={new_dtl_id}")
 
-
-        # 合計金額の更新
+        # 合計金額を更新
         cursor.execute(
             "UPDATE transactions_okabe SET TOTAL_AMT = %s WHERE TRD_ID = %s",
             (total_amount, transaction_id)
         )
-
         conn.commit()
+        print(f"✅ 合計金額更新成功: TOTAL_AMT = {total_amount}")
+
         cursor.close()
         conn.close()
 
         return {"success": True, "total_amount": total_amount}
     
     except mysql.connector.Error as err:
+        print(f"❌ MySQLエラー: {err}")
         raise HTTPException(status_code=500, detail=f"MySQL Error: {err}")
 
     except Exception as e:
+        print(f"❌ 予期しないエラー: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
         
 #  **起動スクリプトを追加**
