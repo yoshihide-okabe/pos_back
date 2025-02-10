@@ -80,6 +80,9 @@ def get_product(code: str):
 @app.post("/purchase")
 def purchase_items(request: PurchaseRequest):
     try:
+        print(f"📝 受信したリクエスト: {request}", file=sys.stdout)
+        sys.stdout.flush()
+        
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
 
